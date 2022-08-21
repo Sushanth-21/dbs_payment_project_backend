@@ -14,8 +14,12 @@ public class Employee implements Serializable{
 	private static final long serialVersionUID = -2215611649531106754L;
 	@Id
 	private Long employeeId;
+	@Column(unique=true)
 	private String employeeName;
 	private String employeePassword;
+	private boolean isActive=false;
+	private boolean isEmployee=true;
+	
 	public Employee() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -46,6 +50,15 @@ public class Employee implements Serializable{
 		Employee other = (Employee) obj;
 		return Objects.equals(employeeId, other.employeeId) && Objects.equals(employeeName, other.employeeName)
 				&& Objects.equals(employeePassword, other.employeePassword);
+	}
+	public boolean isActive() {
+		return isActive;
+	}
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+	public boolean isEmployee() {
+		return isEmployee;
 	}
 	public Long getEmployeeId() {
 		return employeeId;
