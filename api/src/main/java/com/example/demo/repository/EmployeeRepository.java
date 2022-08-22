@@ -10,5 +10,6 @@ import com.example.demo.database.Employee;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee,Long>{
 	Optional<Employee> findByEmployeeName(String employeeName);
+	Optional<Employee> findByEmployeeId(int employeeId);
 
 }

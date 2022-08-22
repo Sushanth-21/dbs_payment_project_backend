@@ -73,6 +73,26 @@ public class Authentication {
 		Optional<CustomerUser> customer=customeruserrepository.findByUserId(id);
 		if(customer.isEmpty())
 		{
+			Optional<Employee> employee=employeerepository.findByEmployeeId(id);
+			if(employee.isEmpty())
+			{
+				msg.put("message","user not found");
+			}
+			else if(!employee.get().isActive())
+			{
+				msg.put("message","user not logged in");
+			}
+			else
+			{
+				Employee employeeuser=employee.get();
+				employeeuser.setActive(false);
+				employeeuser=customeruserrepository.save(employeeuser);
+				msg.put("message","logout successful");
+			}
+			return msg;
+		}
+		if(customer.isEmpty())
+		{
 			msg.put("message","user not found");
 		}
 		else if(!customer.get().isActive())
