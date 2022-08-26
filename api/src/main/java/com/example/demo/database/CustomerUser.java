@@ -15,7 +15,8 @@ public class CustomerUser implements Serializable{
 	 */
 	private static final long serialVersionUID = -294691594747334469L;
 	@Id
-	private int userId;
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private long userId;
 	@Column(unique=true)
 	private String username;
 	@OneToOne
@@ -68,7 +69,7 @@ public class CustomerUser implements Serializable{
 	public void setActive(boolean isActive) {
 		this.isActive = isActive;
 	}
-	public int getUserId() {
+	public long getUserId() {
 		return userId;
 	}
 	public void setUserId(int userId) {

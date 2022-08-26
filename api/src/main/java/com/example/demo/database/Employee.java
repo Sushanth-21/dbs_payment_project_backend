@@ -13,7 +13,8 @@ public class Employee implements Serializable{
 	 */
 	private static final long serialVersionUID = -2215611649531106754L;
 	@Id
-	private Long employeeId;
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private long employeeId;
 	@Column(unique=true)
 	private String employeeName;
 	private String employeePassword;

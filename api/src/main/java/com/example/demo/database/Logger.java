@@ -13,6 +13,7 @@ public class Logger implements Serializable{
 	 */
 	private static final long serialVersionUID = 2092535826019279511L;
 	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long loggerId;
 	@ManyToOne
 	private Customer customerId;

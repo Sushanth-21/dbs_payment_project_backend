@@ -14,6 +14,7 @@ public class Transaction implements Serializable{
 	 */
 	private static final long serialVersionUID = -4477626537343285510L;
 	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long transactionId;
 	@ManyToOne
 	private Customer customerId;

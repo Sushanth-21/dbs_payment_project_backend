@@ -1,6 +1,8 @@
 package com.example.demo.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +25,7 @@ public class Authentication {
 	private EmployeeRepository employeerepository;
 	
 	@PostMapping("/auth/login/")
-	public Object login(@RequestBody JSONObject data) {
+	public ResponseEntity<Object> login(@RequestBody JSONObject data) {
 		JSONObject msg=new JSONObject();
 		Optional<CustomerUser> customer=customeruserrepository.findByUsername(String.valueOf(data.get("username")));
 		if(customer.isEmpty())
@@ -32,22 +34,22 @@ public class Authentication {
 			if(employee.isEmpty())
 			{
 			msg.put("message", "invalid username");
-			return msg;
+			return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
 			}
 			if(employee.get().isActive())
 			{
 				msg.put("message","user already logged in");
-				return msg;
+				return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
 			}
 			if(employee.get().getEmployeePassword().equals(data.get("password")))
 			{
 				employee.get().setActive(true);
-				return employeerepository.save(employee.get());
+				return new ResponseEntity<>(employeerepository.save(employee.get()),HttpStatus.OK);
 			}
 			else
 			{
 				msg.put("message","incorrect password");
-				return msg;
+				return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
 			}
 			
 		}
@@ -56,18 +58,18 @@ public class Authentication {
 		{
 			CustomerUser customeruser=customer.get();
 			customeruser.setActive(true);
-			return customeruserrepository.save(customeruser);
+			return new ResponseEntity<>(customeruserrepository.save(customeruser),HttpStatus.OK);
 		}
 		else
 		{
 			msg.put("message", "invalid password");
-			return msg;
+			return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
 		}
 		
 	}
 	
 	@PostMapping("/auth/logout/{id}")
-	public Object logout(@PathVariable int id)
+	public ResponseEntity<Object> logout(@PathVariable long id)
 	{
 		JSONObject msg=new JSONObject();
 		Optional<CustomerUser> customer=customeruserrepository.findByUserId(id);
@@ -77,27 +79,32 @@ public class Authentication {
 			if(employee.isEmpty())
 			{
 				msg.put("message","user not found");
+				return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
 			}
 			else if(!employee.get().isActive())
 			{
 				msg.put("message","user not logged in");
+				return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
 			}
 			else
 			{
 				Employee employeeuser=employee.get();
 				employeeuser.setActive(false);
-				employeeuser=customeruserrepository.save(employeeuser);
+				employeeuser=employeerepository.save(employeeuser);
 				msg.put("message","logout successful");
+				return new ResponseEntity<>(msg,HttpStatus.OK);
 			}
-			return msg;
+			
 		}
 		if(customer.isEmpty())
 		{
 			msg.put("message","user not found");
+			return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
 		}
 		else if(!customer.get().isActive())
 		{
 			msg.put("message","user not logged in");
+			return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
 		}
 		else
 		{
@@ -105,8 +112,8 @@ public class Authentication {
 			customeruser.setActive(false);
 			customeruser=customeruserrepository.save(customeruser);
 			msg.put("message","logout successful");
+			return new ResponseEntity<>(msg,HttpStatus.OK);
 		}
-		return msg;
 	}
 
 }
