@@ -1,5 +1,6 @@
 package com.example.demo.transaction;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,8 +76,15 @@ public class TransactionController {
 	}
 	@PostMapping("/transaction/intiate/")
 	public ResponseEntity<Object> intiateTransaction(@RequestBody JSONObject request){
-		Optional<Customer> customer=customerrepository.findById(String.valueOf(request.get("customerId")));
 		JSONObject msg=new JSONObject();
+		Calendar calendar = Calendar.getInstance();
+		int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+		if(dayOfWeek==1 || dayOfWeek==0)
+		{
+			msg.put("message", "Transaction declined! Try again on working days.");
+			return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
+		}
+		Optional<Customer> customer=customerrepository.findById(String.valueOf(request.get("customerId")));
 		if(customer.isEmpty())
 		{
 			msg.put("message", "Invalid customer id");
