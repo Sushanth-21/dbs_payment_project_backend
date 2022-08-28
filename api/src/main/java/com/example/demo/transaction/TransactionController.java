@@ -82,7 +82,7 @@ public class TransactionController {
 			msg.put("message", "Invalid customer id");
 			return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
 		}
-		if((int)request.get("clear_balance")<0)
+		if((int)request.get("clearBalance")<0)
 		{
 			if(customer.get().getOverdraftflag()==0)
 			{
@@ -101,19 +101,43 @@ public class TransactionController {
 		Transaction transaction=new Transaction();
 		transaction.setCustomerId(customer.get());
 		transaction.setReceiverBIC(bank.get());
+		transaction.setInrAmount((long)(int)request.get("inrAmount"));
 		transaction.setMessageCode(message.get());
 		transaction.setTransferTypeCode(transfertypes.get());
 		transaction.setReceiverAccountHolderName(String.valueOf(request.get("receiverAccountHolderName")));
 		transaction.setReceiverAccountHolderNumber(String.valueOf(request.get("receiverAccountHolderNumber")));
-		customer.get().setClearBalance((Long)request.get("clearBalance"));
+		customer.get().setClearBalance((long)(int)request.get("clearBalance"));
 		msg.put("customer", customerrepository.save(customer.get()));
 		msg.put("transaction", transactionrepository.save(transaction));
 		return new ResponseEntity<>(msg,HttpStatus.OK);
-		
-		
-			
-			
+	}
 	
+	@GetMapping("/transaction/get_history/")
+	public ResponseEntity<Object> getHistory(){
+		JSONObject msg=new JSONObject();
+		msg.put("history", transactionrepository.findAll());
+		return new ResponseEntity<>(msg,HttpStatus.OK);
+	}
+	
+	@GetMapping("/transaction/top_customers/")
+	public ResponseEntity<Object> topCustomers(){
+		JSONObject msg=new JSONObject();
+		msg.put("top_customers", transactionrepository.findTopCustomers());
+		return new ResponseEntity<>(msg,HttpStatus.OK);
+	}
+	
+	@GetMapping("/transaction/top_banks/")
+	public ResponseEntity<Object> topBanks(){
+		JSONObject msg=new JSONObject();
+		msg.put("top_banks", transactionrepository.findTopBanks());
+		return new ResponseEntity<>(msg,HttpStatus.OK);
+	}
+	
+	@GetMapping("/transaction/top_message_codes/")
+	public ResponseEntity<Object> topMessageCodes(){
+		JSONObject msg=new JSONObject();
+		msg.put("top_message_codes", transactionrepository.findTopMessageCodes());
+		return new ResponseEntity<>(msg,HttpStatus.OK);
 	}
 
 }

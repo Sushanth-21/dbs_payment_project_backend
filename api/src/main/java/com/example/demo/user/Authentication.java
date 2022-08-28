@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.repository.CustomerRepository;
 import com.example.demo.repository.CustomerUserRepository;
 import com.example.demo.repository.EmployeeRepository;
 import com.example.demo.database.*;
@@ -23,6 +24,8 @@ public class Authentication {
 	private CustomerUserRepository customeruserrepository;
 	@Autowired
 	private EmployeeRepository employeerepository;
+	@Autowired
+	private CustomerRepository customerrepository;
 	
 	@PostMapping("/auth/login/")
 	public ResponseEntity<Object> login(@RequestBody JSONObject data) {
@@ -114,6 +117,24 @@ public class Authentication {
 			msg.put("message","logout successful");
 			return new ResponseEntity<>(msg,HttpStatus.OK);
 		}
+	}
+	
+	@PostMapping("/auth/set_customer_credentials/")
+	public ResponseEntity<Object> setCustomerCredentials(@RequestBody JSONObject request){
+		JSONObject msg=new JSONObject();
+		Optional<Customer> customer=customerrepository.findById(String.valueOf(request.get("customerId")));
+		if(customer.isEmpty())
+		{
+			msg.put("message","Invalid customer id.");
+			return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
+		}
+		CustomerUser customeruser=new CustomerUser();
+		customeruser.setCustomer(customer.get());
+		customeruser.setUsername(String.valueOf(request.get("username")));
+		customeruser.setPassword(String.valueOf(request.get("password")));
+		customeruser=customeruserrepository.save(customeruser);
+		msg.put("message", "credentials set for customer - "+customer.get().getCustomerId());
+		return new ResponseEntity<>(msg,HttpStatus.OK);
 	}
 
 }
