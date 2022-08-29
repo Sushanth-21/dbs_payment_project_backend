@@ -17,7 +17,7 @@ public class Customer implements Serializable{
 	private String customerId;
 	private String accountHolderName;
 	private int overdraftflag;
-	private Long clearBalance;
+	private Double clearBalance;
 	private String customerAddress;
 	private String customerCity;
 	private String customerType;
@@ -57,7 +57,7 @@ public class Customer implements Serializable{
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	public Customer(String customerId, String accountHolderName, int overdraftflag, Long clearBalance,
+	public Customer(String customerId, String accountHolderName, int overdraftflag, Double clearBalance,
 			String customerAddress, String customerCity, String customerType) {
 		super();
 		this.customerId = customerId;
@@ -80,10 +80,10 @@ public class Customer implements Serializable{
 	public void setOverdraftflag(int overdraftflag) {
 		this.overdraftflag = overdraftflag;
 	}
-	public Long getClearBalance() {
+	public Double getClearBalance() {
 		return clearBalance;
 	}
-	public void setClearBalance(Long clearBalance) {
+	public void setClearBalance(Double clearBalance) {
 		this.clearBalance = clearBalance;
 	}
 	public String getCustomerAddress() {

@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,8 +25,10 @@ import com.example.demo.repository.CustomerRepository;
 import com.example.demo.repository.MessageRepository;
 import com.example.demo.repository.TransactionRepository;
 import com.example.demo.repository.TransferTypesRepository;
+import com.example.demo.utilities.SdnList;
 
 @RestController
+@CrossOrigin(origins="http://localhost:3000")
 public class TransactionController {
 	@Autowired
 	private TransactionRepository transactionrepository;
@@ -76,48 +79,62 @@ public class TransactionController {
 	}
 	@PostMapping("/transaction/intiate/")
 	public ResponseEntity<Object> intiateTransaction(@RequestBody JSONObject request){
-		JSONObject msg=new JSONObject();
-		Calendar calendar = Calendar.getInstance();
-		int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-		if(dayOfWeek==1 || dayOfWeek==0)
-		{
-			msg.put("message", "Transaction declined! Try again on working days.");
-			return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
-		}
-		Optional<Customer> customer=customerrepository.findById(String.valueOf(request.get("customerId")));
-		if(customer.isEmpty())
-		{
-			msg.put("message", "Invalid customer id");
-			return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
-		}
-		if((int)request.get("clearBalance")<0)
-		{
-			if(customer.get().getOverdraftflag()==0)
+		try {
+			JSONObject msg=new JSONObject();
+			Calendar calendar = Calendar.getInstance();
+			int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+			if(dayOfWeek==1 || dayOfWeek==0)
 			{
-				msg.put("message", "Insufficient funds");
+				msg.put("message", "Transaction declined! Try again on working days.");
 				return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
 			}
+			Optional<Customer> customer=customerrepository.findById(String.valueOf(request.get("customerId")));
+			if(customer.isEmpty())
+			{
+				msg.put("message", "Invalid customer id");
+				return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
+			}
+			if((int)request.get("clearBalance")<0)
+			{
+				if(customer.get().getOverdraftflag()==0)
+				{
+					msg.put("message", "Insufficient funds");
+					return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
+				}
+			}
+			Optional<Bank> bank=bankrepository.findById(String.valueOf(request.get("receiverBic")));
+			if(bank.isEmpty())
+			{
+				msg.put("message", "Invalid receiver bic");
+				return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
+			}
+			SdnList sdnlist=new SdnList();
+			if(sdnlist.findReceiverName(String.valueOf(request.get("receiverAccountHolderName"))))
+            {
+                msg.put("message", "Reciver present in Sdnlist");
+                return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
+            }
+			Optional<Message> message=messagerepository.findById(String.valueOf(request.get("messageCode")));
+			Optional<TransferTypes> transfertypes=transfertypesrepository.findById(String.valueOf(request.get("transferTypeCode")));
+			Transaction transaction=new Transaction();
+			transaction.setCustomerId(customer.get());
+			transaction.setReceiverBIC(bank.get());
+			transaction.setInrAmount((double)request.get("inrAmount"));
+			transaction.setMessageCode(message.get());
+			transaction.setTransferTypeCode(transfertypes.get());
+			transaction.setReceiverAccountHolderName(String.valueOf(request.get("receiverAccountHolderName")));
+			transaction.setReceiverAccountHolderNumber(String.valueOf(request.get("receiverAccountHolderNumber")));
+			customer.get().setClearBalance((double)request.get("clearBalance"));
+			msg.put("customer", customerrepository.save(customer.get()));
+			msg.put("transaction", transactionrepository.save(transaction));
+			return new ResponseEntity<>(msg,HttpStatus.OK);
 		}
-		Optional<Bank> bank=bankrepository.findById(String.valueOf(request.get("receiverBic")));
-		if(bank.isEmpty())
-		{
-			msg.put("message", "Invalid receiver bic");
-			return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
+		catch(Exception e) {
+			JSONObject msg=new JSONObject();
+			msg.put("message",e);
+			return new ResponseEntity<>(msg,HttpStatus.OK);
 		}
-		Optional<Message> message=messagerepository.findById(String.valueOf(request.get("messageCode")));
-		Optional<TransferTypes> transfertypes=transfertypesrepository.findById(String.valueOf(request.get("transferTypeCode")));
-		Transaction transaction=new Transaction();
-		transaction.setCustomerId(customer.get());
-		transaction.setReceiverBIC(bank.get());
-		transaction.setInrAmount((long)(int)request.get("inrAmount"));
-		transaction.setMessageCode(message.get());
-		transaction.setTransferTypeCode(transfertypes.get());
-		transaction.setReceiverAccountHolderName(String.valueOf(request.get("receiverAccountHolderName")));
-		transaction.setReceiverAccountHolderNumber(String.valueOf(request.get("receiverAccountHolderNumber")));
-		customer.get().setClearBalance((long)(int)request.get("clearBalance"));
-		msg.put("customer", customerrepository.save(customer.get()));
-		msg.put("transaction", transactionrepository.save(transaction));
-		return new ResponseEntity<>(msg,HttpStatus.OK);
+		
 	}
 	
 	@GetMapping("/transaction/get_history/")
@@ -146,6 +163,20 @@ public class TransactionController {
 		JSONObject msg=new JSONObject();
 		msg.put("top_message_codes", transactionrepository.findTopMessageCodes());
 		return new ResponseEntity<>(msg,HttpStatus.OK);
+	}
+	
+	@GetMapping("/transaction/get_bic/{id}")
+	public ResponseEntity<Object> getBic(@PathVariable String id)
+	{
+		Optional<Bank> bank=bankrepository.findById(id);
+		JSONObject msg=new JSONObject();
+		if(bank.isEmpty())
+		{
+			msg.put("message", "Invalid bic");
+			return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
+		}
+		msg.put("bankName", bank.get().getBankName());
+		return new ResponseEntity<>(msg,HttpStatus.OK); 
 	}
 
 }

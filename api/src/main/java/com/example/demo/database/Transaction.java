@@ -31,8 +31,8 @@ public class Transaction implements Serializable{
 	@ManyToOne
 	private Message messageCode;
 	private Long currencyAmount;
-	private Long transferFees;
-	private Long inrAmount;
+	private Double transferFees;
+	private Double inrAmount;
 	private LocalDateTime transferDate;
 	public Transaction() {
 		super();
@@ -40,7 +40,7 @@ public class Transaction implements Serializable{
 	}
 	public Transaction(Long transactionId, Customer customerId, Currency currencyCode, Bank senderBIC, Bank receiverBIC,
 			String receiverAccountHolderNumber, String receiverAccountHolderName, TransferTypes transferTypeCode,
-			Message messageCode, Long currencyAmount, Long transferFees, Long inrAmount, LocalDateTime transferDate) {
+			Message messageCode, Long currencyAmount, Double transferFees, Double inrAmount, LocalDateTime transferDate) {
 		super();
 		this.transactionId = transactionId;
 		this.customerId = customerId;
@@ -150,16 +150,16 @@ public class Transaction implements Serializable{
 	public void setCurrencyAmount(Long currencyAmount) {
 		this.currencyAmount = currencyAmount;
 	}
-	public Long getTransferFees() {
+	public Double getTransferFees() {
 		return transferFees;
 	}
-	public void setTransferFees(Long transferFees) {
+	public void setTransferFees(Double transferFees) {
 		this.transferFees = transferFees;
 	}
-	public Long getInrAmount() {
+	public Double getInrAmount() {
 		return inrAmount;
 	}
-	public void setInrAmount(Long inrAmount) {
+	public void setInrAmount(Double inrAmount) {
 		this.inrAmount = inrAmount;
 	}
 	public LocalDateTime getTransferDate() {
