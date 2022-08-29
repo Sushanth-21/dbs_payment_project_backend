@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.database.Bank;
+import com.example.demo.database.Customer;
 import com.example.demo.database.Transaction;
 
 @Repository
@@ -19,4 +20,6 @@ public interface TransactionRepository extends JpaRepository<Transaction,Long>{
 	
 	@Query("SELECT t.messageCode.messageCode,t.messageCode.instruction,COUNT(t.messageCode.messageCode) AS s FROM Transaction AS t GROUP BY t.messageCode.messageCode ORDER BY s DESC")
 	List<String> findTopMessageCodes();
+	
+	List<Transaction> findAllByCustomerId(Customer customerId);
 }

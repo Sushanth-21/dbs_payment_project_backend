@@ -1,5 +1,7 @@
 package com.example.demo.transaction;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
@@ -80,6 +82,7 @@ public class TransactionController {
 	@PostMapping("/transaction/intiate/")
 	public ResponseEntity<Object> intiateTransaction(@RequestBody JSONObject request){
 		try {
+			
 			JSONObject msg=new JSONObject();
 			Calendar calendar = Calendar.getInstance();
 			int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
@@ -94,7 +97,7 @@ public class TransactionController {
 				msg.put("message", "Invalid customer id");
 				return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
 			}
-			if((int)request.get("clearBalance")<0)
+			if((double)request.get("clearBalance")<0)
 			{
 				if(customer.get().getOverdraftflag()==0)
 				{
@@ -102,6 +105,7 @@ public class TransactionController {
 					return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
 				}
 			}
+			
 			Optional<Bank> bank=bankrepository.findById(String.valueOf(request.get("receiverBic")));
 			if(bank.isEmpty())
 			{
@@ -119,11 +123,13 @@ public class TransactionController {
 			Transaction transaction=new Transaction();
 			transaction.setCustomerId(customer.get());
 			transaction.setReceiverBIC(bank.get());
-			transaction.setInrAmount((double)request.get("inrAmount"));
+			
+			transaction.setInrAmount((long)(int)request.get("inrAmount"));
 			transaction.setMessageCode(message.get());
 			transaction.setTransferTypeCode(transfertypes.get());
 			transaction.setReceiverAccountHolderName(String.valueOf(request.get("receiverAccountHolderName")));
 			transaction.setReceiverAccountHolderNumber(String.valueOf(request.get("receiverAccountHolderNumber")));
+			transaction.setTransferDate(LocalDateTime.now());
 			customer.get().setClearBalance((double)request.get("clearBalance"));
 			msg.put("customer", customerrepository.save(customer.get()));
 			msg.put("transaction", transactionrepository.save(transaction));
@@ -137,9 +143,15 @@ public class TransactionController {
 		
 	}
 	
-	@GetMapping("/transaction/get_history/")
-	public ResponseEntity<Object> getHistory(){
+	@GetMapping("/transaction/get_history/{id}")
+	public ResponseEntity<Object> getHistory(@PathVariable String id){
 		JSONObject msg=new JSONObject();
+		
+		if(!id.contentEquals("0")) {
+			Optional<Customer> customer=customerrepository.findById(id);
+			msg.put("history",transactionrepository.findAllByCustomerId(customer.get()));
+			return new ResponseEntity<>(msg,HttpStatus.OK);
+		}
 		msg.put("history", transactionrepository.findAll());
 		return new ResponseEntity<>(msg,HttpStatus.OK);
 	}

@@ -1,8 +1,10 @@
 package com.example.demo.database;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Objects;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
@@ -17,6 +19,7 @@ public class Customer implements Serializable{
 	private String customerId;
 	private String accountHolderName;
 	private int overdraftflag;
+	@Column(precision = 10, scale = 2)
 	private Double clearBalance;
 	private String customerAddress;
 	private String customerCity;

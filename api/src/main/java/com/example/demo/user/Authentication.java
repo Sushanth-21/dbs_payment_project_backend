@@ -58,7 +58,11 @@ public class Authentication {
 			}
 			
 		}
-		
+		if(customer.get().isActive())
+		{
+			msg.put("message","user already logged in");
+			return new ResponseEntity<>(msg,HttpStatus.BAD_REQUEST);
+		}
 		if(customer.get().getPassword().equals(data.get("password")))
 		{
 			CustomerUser customeruser=customer.get();
@@ -135,6 +139,9 @@ public class Authentication {
 		customeruser.setUsername(String.valueOf(request.get("username")));
 		customeruser.setPassword(String.valueOf(request.get("password")));
 		customeruser=customeruserrepository.save(customeruser);
+//		Logger logger=new Logger();
+//		logger.setCustomerId(customer.get());
+//		logger.setUserId(customeruser);
 		msg.put("message", "credentials set for customer - "+customer.get().getCustomerId());
 		return new ResponseEntity<>(msg,HttpStatus.OK);
 	}

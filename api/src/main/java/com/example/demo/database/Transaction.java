@@ -1,6 +1,7 @@
 package com.example.demo.database;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -31,8 +32,9 @@ public class Transaction implements Serializable{
 	@ManyToOne
 	private Message messageCode;
 	private Long currencyAmount;
+	@Column(precision = 10, scale = 2)
 	private Double transferFees;
-	private Double inrAmount;
+	private Long inrAmount;
 	private LocalDateTime transferDate;
 	public Transaction() {
 		super();
@@ -40,7 +42,7 @@ public class Transaction implements Serializable{
 	}
 	public Transaction(Long transactionId, Customer customerId, Currency currencyCode, Bank senderBIC, Bank receiverBIC,
 			String receiverAccountHolderNumber, String receiverAccountHolderName, TransferTypes transferTypeCode,
-			Message messageCode, Long currencyAmount, Double transferFees, Double inrAmount, LocalDateTime transferDate) {
+			Message messageCode, Long currencyAmount, Double transferFees, Long inrAmount, LocalDateTime transferDate) {
 		super();
 		this.transactionId = transactionId;
 		this.customerId = customerId;
@@ -156,10 +158,10 @@ public class Transaction implements Serializable{
 	public void setTransferFees(Double transferFees) {
 		this.transferFees = transferFees;
 	}
-	public Double getInrAmount() {
+	public Long getInrAmount() {
 		return inrAmount;
 	}
-	public void setInrAmount(Double inrAmount) {
+	public void setInrAmount(Long inrAmount) {
 		this.inrAmount = inrAmount;
 	}
 	public LocalDateTime getTransferDate() {
